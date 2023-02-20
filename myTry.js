@@ -12,8 +12,6 @@
 //ctx.moveTo(margin + size/2.4, margin)
 //ctx.lineTo(margin, margin + size )
 
-let time = 0
-
 
 
 
@@ -35,7 +33,7 @@ class StartScene extends Scene{
 class MainScene extends Scene{
     start(){
         this.up = true
-        this.playerX = canvas.height/2
+        this.playerX = canvas.width/2
         this.playerY = canvas.height/2
         this.playerVX = 0
         this.playerVY = 7.5
@@ -47,8 +45,9 @@ class MainScene extends Scene{
         this.enemyY2 = 20
         this.enemyVX2 = 15
         this.enemyVY2 = 15
-        this.player = (this.playerX, this.playerY)
-        this.collision = (this.enemyX, this.enemyY)
+        this.time=0
+        //this.good = (this.playerX, this.playerY)
+        //this.collision = (this.enemyX, this.enemyY)
 
     }
     update(){
@@ -56,9 +55,9 @@ class MainScene extends Scene{
         this.enemyY += this.enemyVY
         this.enemyX2 += this.enemyVX2
         this.enemyY2 += this.enemyVY2
-        this.player = (this.playerX, this.playerY)
+        this.good = (this.playerX, this.playerY)
         this.collision = (this.enemyX, this.enemyY)
-        time +=1
+        this.time +=1
 
         if (this.playerY >= canvas.height-60) {
             
@@ -75,7 +74,7 @@ class MainScene extends Scene{
             this.playerX += 5
         }
         if (keysDown["ArrowUp"]) {
-            this.player -= this.playerVY
+            this.playerY -= this.playerVY
 
         }
         if (keysDown["ArrowDown"]){
@@ -109,9 +108,9 @@ class MainScene extends Scene{
         }
 
 //ASK ABOUT COLLISION DETECTION <========> equation for circle (x-this.enemyX)^2 + (y-this.enemyY)^2 = 5^2
-        if (this.player == this.enemy){
+        if (this.good == this.collision){
             console.log("game over")
-            score = time
+            this.score = this.time
             scene = 2
         } 
     }
@@ -124,25 +123,25 @@ class MainScene extends Scene{
 
         ctx.fillStyle = "red"
         ctx.beginPath()
-        ctx.arc(playerX, this.playerY, 5, 0, Math.PI * 2)
+        ctx.arc(this.playerX, this.playerY, 5, 0, Math.PI * 2)
         ctx.fill()
 
         ctx.fillStyle = "blue"
         ctx.beginPath()
-        ctx.arc(this.enemyX, this.this.enemyY, 5, 0, Math.PI * 2)
+        ctx.arc(this.enemyX, this.enemyY, 5, 0, Math.PI * 2)
         ctx.fill()
 
         ctx.fillStyle = "blue"
         ctx.beginPath()
-        ctx.arc(this.enemyX2, this.this.enemyY2, 5, 0, Math.PI * 2)
+        ctx.arc(this.enemyX2, this.enemyY2, 5, 0, Math.PI * 2)
         ctx.fill()
 
         ctx.fillStyle = "white"
-        ctx.fillText("Score: "+ time, canvas.width/2, canvas.height-40)
+        ctx.fillText("Score: "+ this.time, canvas.width/2, canvas.height-40)
     }
 }
 
-class EndScene extends Scene{
+class EndScene extends Scene {
     update(){
         if (keysDown["d"]){
             SceneManager.changeScene(0)
