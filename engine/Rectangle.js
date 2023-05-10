@@ -47,4 +47,3 @@ class Rectangle extends Component {
 
 //Add rectangle to the global namespace.
 window.Rectangle = Rectangle;
-

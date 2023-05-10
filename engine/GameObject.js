@@ -135,6 +135,7 @@ class GameObject {
             gameObject.started = true
             gameObject.start()
         }
+        return gameObject
     }
 }
 

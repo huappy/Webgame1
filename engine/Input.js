@@ -33,6 +33,8 @@ class Input {
 
   static mouseDown = false;
 
+  static mouseUp = false;
+
   /**
    * Reset certain values when the frame ends.
    * 
@@ -48,6 +50,7 @@ class Input {
     Input.lastMouseX = Input.mouseX;
     Input.lastMouseY = Input.mouseY;
     Input.tick = 0;
+    Input.mouseUp = false;
   }
 
   /**
@@ -103,6 +106,7 @@ class Input {
       Input.mouseX = e.clientX
       Input.mouseY = e.clientY
       Input.mouseDown = false;
+      Input.mouseUp = true;
     });
 
     

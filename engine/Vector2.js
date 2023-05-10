@@ -66,6 +66,33 @@ class Vector2 {
     this.x = x;
     this.y = y;
   }
+
+  minus(other){
+    return new Vector2(this.x-other.x, this.y - other.y);
+  }
+  add(other){
+    return new Vector2(this.x + other.x, this.y+other.y);
+  }
+
+  perpendicular(){
+    return new Vector2(this.y, -this.x);
+  }
+
+  dot(other){
+    return this.x * other.x + this.y * other.y;
+  }
+
+  length(){
+    return Math.sqrt(this.x**2+this.y**2);
+  }
+  normalize(){
+    let length = this.length();
+    if(!length) throw "Divide by zero error";
+    return new Vector2(this.x/length, this.y/length);
+  }
+  scale(scalar){
+    return new Vector2(this.x*scalar, this.y*scalar);
+  }
 }
 
 //Add Vector2 to the global window object.

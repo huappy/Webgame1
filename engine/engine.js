@@ -7,6 +7,8 @@ import "./Circle.js"
 import "./Camera.js"
 import "./Rectangle.js"
 import "./GUIRectangle.js"
+import "./GUIText.js"
+import "./GUITextCentered.js"
 import "./ScreenRectangle.js"
 import "./Line.js"
 import "./Text.js"
@@ -14,7 +16,7 @@ import "./Vector2.js"
 import "./Time.js"
 import "./Input.js"
 import "./CameraMover.js"
-import "./TileMap.js"
+import "./Point.js"
 
 class EngineGlobals{
     static requestedAspectRatio = 16/9;
@@ -102,10 +104,7 @@ function gameLoop() {
  * This function should never by called by game code.
  */
 function update() {
-    //Match the size of the canvas to the browser's size
-    //This allows us to respond to browser size changes
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
+    
 
     //Handle the case when there is a system level pause.
     if (pause) return
@@ -184,6 +183,10 @@ let letterboxColor = "gray"
  * This should never be called directly from game code.
  */
 function draw() {
+    //Match the size of the canvas to the browser's size
+    //This allows us to respond to browser size changes
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
     //Adjust for the camera
     ctx.fillStyle = Camera.main.fillStyle;
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);

@@ -98,7 +98,7 @@ class MainController extends Component {
     walls = [
             //floor
         {
-           type: new Rectangle("transparent", "transparent", 10),
+           type: new Rectangle("gray", "gray", 10),
            size: new Vector2(0, 200),
            transform_sx: 1000,
            transform_sy: 100
@@ -106,7 +106,7 @@ class MainController extends Component {
 
             //ceiling
         {
-            type: new Rectangle("gray", "gray", 10),
+            type: new Rectangle("transparent", "transparent", 10),
             size: new Vector2(0, -245),
             transform_sx: 1000,
             transform_sy: 100
@@ -155,21 +155,33 @@ class MainController extends Component {
 
         circle.transform.sx = 5
         circle.transform.x = -15
+
+        let handleComponent = new HandlerComponent();
+        handleComponent.collider = circle
+        playerGameObject.addComponent(handleComponent)
+
+
         GameObject.instantiate(playerGameObject)
 
         let collisionObject = GameObject.instantiate(new GameObject("PlayerColision"))
 
         let count = 0
 
-        let wallObject = null;
 
         for(let wall of this.walls){
-            let wallObject = GameObject.instantiate(new GameObject("Walls" + count))
+            let wallObject = new GameObject("Walls" + count)
+            
             wallObject.addComponent(wall.type)
             wallObject.transform.x = wall.size.x
             wallObject.transform.y = wall.size.y
             wallObject.transform.sx = wall.transform_sx
             wallObject.transform.sy = wall.transform_sy
+            
+            handleComponent = new HandlerComponent();
+            handleComponent.collider = wall.type
+            wallObject.addComponent(handleComponent)
+
+            GameObject.instantiate(wallObject)
 
             count++
         }
@@ -256,8 +268,14 @@ class MainScene extends Scene {
         // rightWallGameObject.addComponent(HandleComponent)
 
             this.addGameObject(new GameObject("ControllerGameObject").addComponent(new MainController()))
-
+        
         }
+        // update(){
+        //     this.time += Time.deltaTime
+        //     if(this.time % 360 == 0){
+
+        //     }
+        // }
     }
 
 
@@ -268,16 +286,16 @@ class PointsComponent extends Component {
     }
     handleUpdate(component, eventName) {
         
-            this.points++;
-            let persistentPointsComponent = GameObject
-                .getObjectByName("PersistentPointsGameObject")
-                .getComponent("PersistentPointsComponent")
-            if (this.points > persistentPointsComponent.points) {
-                persistentPointsComponent.updatePoints(this.points)
-            }
         
     }
     update() {
+        this.points = Time.deltaTime ;
+        let persistentPointsComponent = GameObject
+            .getObjectByName("PersistentPointsGameObject")
+            .getComponent("PersistentPointsComponent")
+        if (this.points > persistentPointsComponent.points) {
+            persistentPointsComponent.updatePoints(this.points)
+        }
         this.parent.getComponent("Text").string = "Game Points: " + this.points;
     }
 
@@ -322,35 +340,36 @@ class PlayerComponent extends Component {
         this.playerVY = 7.5
     }
     update() {
+
+
         if (this.transform.y >= 300) {
             
         }
         else if (this.transform.y <= 135 &! keysDown["ArrowUp"]){
             this.transform.y += this.playerVY
             this.playerVY = 7.5
-        }
 
         if (keysDown["ArrowLeft"]) {  
-            if (this.transform.x > -340) {
                 this.transform.x -= 5
-            }
+    
         }
         else if (keysDown["ArrowRight"]) {
-            if (this.transform.x < 340){
+           
             this.transform.x += 5
-            }
+            
         }
         if (keysDown["ArrowUp"]) {
-            if (this.transform.y > -185){
             this.transform.y -= this.playerVY
-            }
+            this.playerVY = 7.5
+    
         }
-        if (keysDown["ArrowDown"] &! this.transform.y >= 300){
+        else if (keysDown["ArrowDown"]){
             this.transform.y += this.playerVY*.5
         }
 
     }
 
+}
 }
 
 
@@ -368,7 +387,7 @@ class MainCameraComponent extends Component {
 }
 
 
-class ColisionComponent extends Component{
+class CollisionComponent extends Component{
 //Look for collisions
     static componentNames = [
         "Rectangle",
@@ -383,7 +402,7 @@ class ColisionComponent extends Component{
         let componentOne;
         let componentTwo;
 
-        for(let name of Collision.componentNames){
+        for(let name of CollisionComponent.componentNames){
             componentOne = one.getComponent(name);
             if(componentOne) {
                 typeOne = name;
@@ -395,7 +414,7 @@ class ColisionComponent extends Component{
             return;
         }
 
-        for (let name of Collision.componentNames){
+        for (let name of CollisionComponent.componentNames){
             componentTwo = two.getComponent(name)
             if (componentTwo){
                 typeTwo = name;
@@ -407,128 +426,189 @@ class ColisionComponent extends Component{
             return false;
         }
         if (typeOne == "Point" && typeTwo == "Circle"){
-            return Collision.handlePointCircle(componentOne, componentTwo)
+            return CollisionComponent.handlePointCircle(componentOne, componentTwo)
         }
         if (typeOne == "Point" && typeTwo == "Rectangle"){
-            return Collision.handlePointRect(componentOne, componentTwo)   
+            return CollisionComponent.handlePointRect(componentOne, componentTwo)   
         }
         if (typeOne == "Circle" && typeTwo == "Point"){
             //flip
-            return Collision.handlePointCircle(componentTwo, componentOne)
+            return CollisionComponent.handlePointCircle(componentTwo, componentOne)
         }
         if (typeOne == "Circle" && typeTwo == "Circle"){
-            return Collision.handleCirlceCircle(componentOne, componentTwo)
+            return CollisionComponent.handleCirlceCircle(componentOne, componentTwo)
         }
         if (typeOne == "Circle" && typeTwo == "Rectangle"){
-            return Collision.handleCircleRect(componentOne, componentTwo)
+            return CollisionComponent.handleCircleRect(componentOne, componentTwo)
         }
         if (typeOne == "Rectangle" && typeTwo == "Point"){
             //flip
-            return Collision.handlePointRect(componentTwo, componentOne)
+            return CollisionComponent.handlePointRect(componentTwo, componentOne)
         }
         if (typeOne == "Rectangle" && typeTwo == "Circle"){
             //flip
-            return Collision.handleCircleRect(componentTwo, componentOne)
+            return CollisionComponent.handleCircleRect(componentTwo, componentOne)
         }
         if (typeOne == "Rectangle" && typeTwo == "Rectangle"){
-            return Collision.handleRectRect(componentOne, componentTwo)
+            return CollisionComponent.handleRectRect(componentOne, componentTwo)
         }
     }
 
     static handlePointCircle(one, two) {
-        let distance = math.sqrt((one.transform.x - two.transform.x) ** 2 + (one.transform.y - two.transform.y) ** 2)
-        return distance <= two.transform.sx
-    }
-
-    static handlePointRect(one, two){
-        let x = one.transform.x
-        let y = one.transform.y
+        let distance = Math.sqrt((one.transform.x - two.transform.x) ** 2 + (one.transform.y - two.transform.y) ** 2)
+        return distance <= two.transform.sx;
+      }
+      static handlePointRect(one, two) {
+        let x = one.transform.x;
+        let y = one.transform.y;
         let left = two.transform.x - two.transform.sx / 2;
         let right = two.transform.x + two.transform.sx / 2;
         let bottom = two.transform.y - two.transform.sy / 2;
         let top = two.transform.y + two.transform.sy / 2;
-
+    
         return x > left && x < right && y > bottom && y < top;
-    }
-
-    static handleCircleCircle(one, two){
-        let distance = Math.sqrt((one.transform.x - two.transform.x) 
-        ** 2 + (one.transform.y - two.transform.y) ** 2)
-        return distance <= one.transform.sx + two.transform.sx
-    }
-
-    static hanleCircleRect(one, two){
-        let lineBetweenCenters = {AB: null, C: null, distance: 0}
-        let centerCircle = new Vector2(one.transform.x, one.transform.y)
-        let centerRectangle = new Vector2(two.transform.x, two.transform.y)
-        lineBetweenCenters.AB = centerCircle.minus(centerRectangle).normalize()
-
+      }
+      static handleCircleCircle(one, two) {
+        let distance = Math.sqrt((one.transform.x - two.transform.x) ** 2 + (one.transform.y - two.transform.y) ** 2)
+        return distance <= one.transform.sx + two.transform.sx;
+      }
+      static handleCircleRect(one, two) {
+    
+        let lineBetweenCenters = { AB: null, C: null, distance:0 };
+        let centerCircle = new Vector2(one.transform.x, one.transform.y);
+        let centerRectangle = new Vector2(two.transform.x, two.transform.y);
+        lineBetweenCenters.AB = centerCircle.minus(centerRectangle).normalize();
+      
         lineBetweenCenters.C = -lineBetweenCenters.AB.dot(centerCircle)
-        lineBetweenCenters.distance = centerCircle.minus(centerRectangle).length()
-
+        lineBetweenCenters.distance = centerCircle.minus(centerRectangle).length();
+    
         let r1 = centerCircle.add(lineBetweenCenters.AB.scale(one.transform.sx))
-        let r2 = centerCircle.add(lineBetwenCenters.AB.scale(-one.transform.sx))
-   
-        let corner1 = new Vector2(two.transform.sx/2, two.transform.sy/2)
-        let corner2 = new Vector2(-two.transform.sx/2, two.transform.sy/2)
-        let corner3 = new Vector2(-two.transform.sx/2, -two.transform.sy/2)
-        let corner4 = new Vector2(two.transform.sx/2, -two.transform.sy/2)
-
-        let dot1 = corner1.dot(lineBetweenCenters.AB) + lineBetweenCenters.distance
-        let dot2 = corner2.dot(lineBetweenCenters.AB) + lineBetweenCenters.distance
-        let dot3 = corner3.dot(lineBetweenCenters.AB) + lineBetweenCenters.distance
-        let dot4 = corner4.dot(lineBetweenCenters.AB) + lineBetweenCenters.distance
-        let dots = [dot1, dot2, dot3, dot4]
-        let rs = [one.transform.sx, -one.transform.sx]
+        let r2 = centerCircle.add(lineBetweenCenters.AB.scale(-one.transform.sx))
+    
+        let corner1 = new Vector2(two.transform.sx/2, two.transform.sy/2);
+        let corner2 = new Vector2(-two.transform.sx/2, two.transform.sy/2);
+        let corner3 = new Vector2(-two.transform.sx/2, -two.transform.sy/2);
+        let corner4 = new Vector2(two.transform.sx/2, -two.transform.sy/2);
+    
+        let dot1 = corner1.dot(lineBetweenCenters.AB)+lineBetweenCenters.distance
+        let dot2 = corner2.dot(lineBetweenCenters.AB)+lineBetweenCenters.distance
+        let dot3 = corner3.dot(lineBetweenCenters.AB)+lineBetweenCenters.distance
+        let dot4 = corner4.dot(lineBetweenCenters.AB)+lineBetweenCenters.distance
+        let dots = [dot1,dot2, dot3, dot4];
+        let rs = [one.transform.sx, -one.transform.sx];
         for(let dot of dots){
-            if(dot < one.transform.sx)
-            return true
+          if(dot < one.transform.sx)
+          return true
         }
-        return false
-
-   
-   
-    }
-
-    static handleRectRect(one, two){
-        let left1 = one.transform.x - one.transform.sx /2;
-        let right1 = one.transform.x + one.transform.sx /2;
-        let bottom1 = one.transform.y - one.transform.sy /2
-        let top1 = one.transform.y + one.transform.sy /2
-
-        let left2 = two.transform.x - two.transform.sx / 2
-        let right2 = two.transform.x + two.transform.sx /2
-        let bottom = two.transform.y - two.transform.sy /2
-        let top = two.transform.y - two.transform.sy /2
-
+        return false;
+    
+    
+        // let possibleLines = [];
+    
+        // let left = two.transform.x - two.transform.sx / 2;
+        // let right = two.transform.x + two.transform.sx / 2;
+        // let bottom = two.transform.y - two.transform.sy / 2;
+        // let top = two.transform.y + two.transform.sy / 2;
+    
+        // if (one.transform.x < left) {
+        //   let one = new Vector2(left, bottom);
+        //   let two = new Vector2(left, top);
+        //   let AB = one.minus(two).normalize().perpendicular()
+        //   let C = -AB.dot(one);
+        //   possibleLines.push({ AB, C })
+        // }
+        // if (one.transform.x > right) {
+        //   let one = new Vector2(right, bottom);
+        //   let two = new Vector2(right, top);
+        //   let AB = one.minus(two).normalize().perpendicular()
+        //   let C = -AB.dot(one);
+        //   possibleLines.push({ AB, C })
+    
+        // }
+        // if (one.transform.y < bottom) {
+        //   let one = new Vector2(left, bottom);
+        //   let two = new Vector2(right, bottom);
+        //   let AB = one.minus(two).normalize().perpendicular()
+        //   let C = -AB.dot(one);
+        //   possibleLines.push({ AB, C })
+        // }
+        // if (one.transform.y > top) {
+        //   let one = new Vector2(left, top);
+        //   let two = new Vector2(right, top);
+        //   let AB = one.minus(two).normalize().perpendicular()
+        //   let C = -AB.dot(one);
+        //   possibleLines.push({ AB, C })
+        // }
+    
+        // if (possibleLines.length == 0) {
+        //   return true
+        // }
+    
+        // if (one.transform.x < 24.7) {
+        //   let noop;
+        //   console.log("Hi")
+        // }
+    
+        // //Go through the possible lines and respond accordingly
+        // let distances = [];
+    
+        // for (let line of possibleLines) {
+        //   let distance = line.AB.dot(new Vector2(one.transform.x, one.transform.y)) + line.C;
+        //   distances.push(distance);
+        // }
+    
+        // let maxDistance = Math.max(...distances.map(x => Math.abs(x)));
+        // if (maxDistance < one.transform.sx) {
+        //   return true;
+        // }
+        // return false;
+    
+    
+    
+      }
+      static handleRectRect(one, two) {
+        let left1 = one.transform.x - one.transform.sx / 2;
+        let right1 = one.transform.x + one.transform.sx / 2;
+        let bottom1 = one.transform.y - one.transform.sy / 2
+        let top1 = one.transform.y + one.transform.sy / 2
+    
+        let left2 = two.transform.x - two.transform.sx / 2;
+        let right2 = two.transform.x + two.transform.sx / 2;
+        let bottom2 = two.transform.y - two.transform.sy / 2
+        let top2 = two.transform.y + two.transform.sy / 2
+    
         return !(left1 > right2 || left2 > right1
-            || right1 < left2 || right2 < left1 
-            || bottom1 > top2 || bottom2 > top1
-            || top1 < bottom2 || top2 < bottom1)
+          || right1 < left2 || right2 < left1
+          || bottom1 > top2 || bottom2 > top1
+          || top1 < bottom2 || top2 < bottom1)
+    
+      }
     }
-
-}
+    
 
 class HandlerComponent extends Component{
-
+    collider
     start(){
-        this.controller = GameObject.getObjectByName("ControllerGameObject")
+        this.controller = GameObject.getObjectByName("ControllerGameObject").getComponent("MainController")
+        this.originalVelocity= this.collider.vy
     }
 
     update(){
-    this.time += TIme.deltaTime
-    for (let i = 0; i < this.controller.enemyGameObjects.length; i++) {
-        let gameObject = GameObject.getObjectByName("StaticGameObject" + i);
+    for (let i = 0; i < this.controller.walls.length; i++) {
+        let gameObject = GameObject.getObjectByName("Walls" + i);
   
-        //Color based on collisions
-        if (Collision.handle(this.parent, gameObject)) {
-          //If there is a collision, turn yellow and stop
+        
 
-          break;
+        if (CollisionComponent.handle(this.parent, gameObject)) {
+
+            // if this.parent.name 
+            console.log("collision: "+ this.parent.name + " and "+ gameObject.name)
+            this.collider.vy = 0
+            break
         }
         else {
           //Otherwise, return to the normal color
-          this.collider.fillStyle = this.originalColor;
+          this.collider.vy = this.originalVelocity
         }
       }
     }
