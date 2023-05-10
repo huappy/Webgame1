@@ -1,21 +1,4 @@
-/*This commented out code was going to be a JRPG map but I decided to play with physics instead*/
-
-//let margin = 20
-//size = 1000
-//ctx.fillStyle = "green";
-//ctx.fillRect(margin,margin, size, size);
-
-//ctx.strokeStyle = "white";
-//ctx.beginPath()
-//ctx.moveTo(margin + size/2,margin)
-//ctx.lineTo(margin + size, margin)
-//ctx.moveTo(margin + size/2.4, margin)
-//ctx.lineTo(margin, margin + size )
-
-
-
-
-
+import "/engine/engine.js"
 class StartScene extends Scene{
     update(){
         if (keysDown["f"]){
@@ -46,8 +29,8 @@ class MainScene extends Scene{
         this.enemyVX2 = 15
         this.enemyVY2 = 15
         this.time=0
-        //this.good = (this.playerX, this.playerY)
-        //this.collision = (this.enemyX, this.enemyY)
+        this.good = (this.playerX, this.playerY)
+        this.collision = (this.enemyX, this.enemyY)
 
     }
     update(){
@@ -143,7 +126,7 @@ class MainScene extends Scene{
 
 class EndScene extends Scene {
     update(){
-        if (keysDown["d"]){
+        if (keysDown["f"]){
             SceneManager.changeScene(0)
         }
     }
