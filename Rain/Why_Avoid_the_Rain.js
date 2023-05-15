@@ -78,9 +78,10 @@ class StartScene extends Scene {
     start() {
         this.addGameObject(new GameObject("StartConttrollerGameObject").addComponent(new StartController()))
         this.addGameObject(new GameObject("PersistentPointsGameObject").addComponent(new PersistentPointsComponent()))
-        this.addGameObject(new GameObject("WelcomeToPongGameObject").addComponent(new Text("Rain", "blue")), new Vector2(-125, 20))
-        this.addGameObject(new GameObject("MaxScoreGameObject").addComponent(new Text("", "white")).addComponent(new ScoreSetterComponent()), new Vector2(-125, 45))        
-
+        this.addGameObject(new GameObject("TitleTextGameObject").addComponent(new Text("Why Avoid the Rain?", "blue")), new Vector2(-125, 0))
+        this.addGameObject(new GameObject("MaxScoreGameObject").addComponent(new Text("", "white")).addComponent(new ScoreSetterComponent()), new Vector2(-70, 45))        
+        this.addGameObject(new GameObject("StartText").addComponent(new Text("Press 's' to start", "white")), new Vector2(-70, 70)) 
+        this.addGameObject(new GameObject("EndText").addComponent(new Text("Press 'e' to end", "white")), new Vector2(-70, 95))
         Camera.main.parent.addComponent(new StartCameraComponent());
         
     
@@ -162,7 +163,7 @@ class MainController extends Component {
         this.setGradient = true;
         this.score = 0;
 
-        this.handle = new HandlerComponent()
+        this.handle = new PlayerHandlerComponent()
         
         //Create new player object
         let playerGameObject = new GameObject("PlayerGameObject")
@@ -533,7 +534,7 @@ update(){
             let enemyComponent = new EnemyComponent()
             enemyComponent.addListener(this)
             enemyComponent.addListener(enemyGameObject)
-            enemyGameObject.addComponent(enemyComponent)
+            enemyGameObject.addComponent(enemyComponent.handle)
             //create the ball. Need to figure out how to assign which ball is player and which is enemy 
             let badCircle = new Circle() 
             enemyGameObject.addComponent(badCircle)
@@ -679,6 +680,9 @@ update(){
             console.log("resume")
 
         }
+        if (keysDown["e"]){
+            SceneManager.changeScene(2)
+        }
 
     }
 
@@ -729,7 +733,6 @@ class MainScene extends Scene {
         }
         handleUpdate(component, eventName) {
             if (eventName == "Hit")  {
-                //I don't think I need this, it checks the game over conditions for pong
                 //however, I will need to put my own end conditions there and this can help me figure out how to do that.
                 let playerGameObjects = GameObject.getObjectsByName("PlayerGameObject")
                 let countLive = 0;
@@ -1192,38 +1195,87 @@ class CollisionComponent extends Component{
     }
     
 
-class HandlerComponent extends Component{
-    collider
-    start(){
-        this.controller = GameObject.getObjectByName("ControllerGameObject").getComponent("MainController")
-        this.originalVelocity= this.collider.vy
-    }
-
-    update(){
-    for (let i = 0; i < this.controller.walls.length; i++) {
-        let gameObject = GameObject.getObjectByName("Walls" + i);
-  
-        
-        if (CollisionComponent.handle(this.parent, gameObject)) {
-            this.collider.vy = 0
-            break
+    class PlayerHandlerComponent extends Component{
+        //THIS IS THE PART I'M HAVING TROUBLE WITH
+       /* start(){
+            this.controller = GameObject.getObjectByName("ControllerGameObject").getComponent("MainController")
+            let enemyGameObjects = GameObject.getObjectsByName("Enemy")
         }
-        else {
-          //Otherwise, return to the normal color
-          this.collider.vy = originalVelocity
+    
+        update(){
+            let enemyGameObjects = GameObject.getObjectsByName("Enemy")
+            for( let enemyGameObject of enemyGameObjects){
+                if(CollisionComponent.handle(this.parent, enemyGameObject)){
+                    this.parent.destroy()
+                    break
+                }
+                }
+            }
+            */
+            //TROUBLE SPOT ENDS HERE
 
-    enemies = getObjectByName("Enemy")
-    this.scene =sceneManager.getActiveScene() 
-    for(gameObject in this.scene.GameObjects){
-        if (CollisionComponent.handle(this.parent, gameObject) && this.parent != gameObject){
-            console.log(this.parent +", " + gameObject)
-    }
+
+
+
+        
+        // for(let i = 0; i < this.controller.walls.length; i++){
+        //     let gameObject = GameObject.getObjectByName("Wall" + i)
+        
+        
+        // if (CollisionComponent.handle(this.parent, gameObject) && gameObject.name == "Wall0" || gameObject.name == "Wall1" ) {
+        //     this.parent.playerComponent.playerVY = 0
+        //     break
+        // }
+        // else {
+        //   //Otherwise, return to the normal color
+        //   this.parent.playerComponent.playerVY = this.originalVelocityY
+        // }
+        // if (CollisionComponent.handle(this.parent, gameObject) && gameObject.name == "Wall1") {
+        //     this.collider.vy = 0
+        //     break
+        // }
+        // else {
+        //   //Otherwise, return to the normal color
+        //   this.collider.vy = originalVelocity
+        // }
+    //}
         
       }
+     
+
+
+    class EnemyHandlerComponent extends Component{
+        wall
+        start(){
+            // this.controller = GameObject.getObjectByName("ControllerGameObject").getComponent("MainController")
+            // this.originalVelocity= this.collider.vy
+        }
+    
+        update(){
+    //         for(let i = 0; i < this.controller.walls.length){
+    
+    //         }
+            
+    //         if (CollisionComponent.handle(this.parent.name = "Circle", gameObject = "PlayerGameObject")) {
+    //             this.collider.vy = 0
+    //             break
+    //         }
+    //         else {
+    //           //Otherwise, return to the normal color
+    //           this.collider.vy = originalVelocity
+    
+    //     enemies = getObjectByName("Enemy")
+    //     this.scene =sceneManager.getActiveScene() 
+    //     for(gameObject in this.scene.GameObjects){
+    //         if (CollisionComponent.handle(this.parent, gameObject) && this.parent != gameObject){
+    //             console.log(this.parent +", " + gameObject)
+    //     }
+            
+    //       }
+    //      }
      }
-}
-    }
-}
+         }
+
 
 
 
@@ -1233,7 +1285,7 @@ class HandlerComponent extends Component{
 
 class EndController extends Component {
     update() {
-        if (keysDown["v"]){
+        if (keysDown["r"]){
             SceneManager.changeScene(0)
         }
     }
@@ -1245,11 +1297,9 @@ class EndScene extends Scene{
     }
     start(){
         this.addGameObject(new GameObject().addComponent(new EndController()))
-        this.addGameObject(new GameObject().addComponent(new Text("You Lost", "red")), new Vector2(15, 20))
-        this.addGameObject(new GameObject("MaxPointsGameObject")
-            .addComponent(new ScoreSetterComponent())
-            .addComponent(new Text("", "red")),
-            new Vector2(15, 37))
+        this.addGameObject(new GameObject().addComponent(new Text("You gave in to the rain...but...", "red")), new Vector2(-140, 0))
+        this.addGameObject(new GameObject().addComponent(new Text("Congratulations!", "red")), new Vector2(-90, 60))
+        this.addGameObject(new GameObject().addComponent(new Text("You Won!", "red")), new Vector2(-60, 35))
     }
 }
 
